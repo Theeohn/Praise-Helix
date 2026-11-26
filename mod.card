@@ -1,0 +1,29 @@
+-- Sharing metadata.  Read by tooling and the manager detail pane; never by
+-- the loader's merge.
+return {
+  summary = "Twitch Plays Pokemon chaos on top of your own buttons, on all 11 games, nearly everywhere you can go.",
+  author = "Theeohn",
+  contact = "",
+  tags = { "fun", "chaos", "twitch-plays", "input", "challenge" },
+  differences = {
+    added = {
+      "PRAISE HELIX: OFF / DIGRAT / BRDJESUS / HELIX -- a random UP, DOWN, LEFT, RIGHT, A, B, START or SELECT every 0.9 s / 0.5 s / 0.2 s, on top of the player's own buttons",
+      "the direction : other-button mix swings every 10 s between 8:2, 7:3 and 6:4 (8:2 a little less often)",
+      "HELIX also queues the player's own buttons: one of them (the last pressed, or the one held) reaches the game every 1.3 s",
+      "BATTLES: OFF / TRAINERS / ALL -- which battles the chaos plays in (TRAINERS by default)",
+      "hold START+SELECT for a quarter second (keys, pad or two fingers on touch) to turn PRAISE HELIX OFF (saved), ahead of HELIX's queue; a STRTSLCT row tops the options page",
+      "starts only once the player is back in the overworld after turning it on",
+    },
+    known = {
+      "goes nearly everywhere: overworld, START menu screens and all their submenus, PC, shops, POKEMON CENTER, Day-Care, NPC yes/no, berry trees, SAVE, battles -- mod-rebuilt screens included",
+      "never A on RELEASE in any PC, or during a release",
+      "never in the Mod Manager, any options/settings screen, START rows that are not the game's own (OPTION, MODS, QUIT, mod rows) or what they open, link play, the title; paused until the overworld",
+      "the player's START+SELECT is also seen by the game outside HELIX (it may open the START menu)",
+    },
+  },
+  credits = {
+    { who = "Twitch Plays Pokemon", for_ = "the 2014 stream this recreates" },
+    { who = "ZyranCZ", for_ = "autofire (https://github.com/ZyranCZ/autofire), the reference for using the engine's tool-input API" },
+    { who = "BOIS CLUB GAMES, LLC", for_ = "the Pokemon Gen 1 Recompilation Project this is built for (https://github.com/bryanthaboi/gen1recomp)" },
+  },
+}
