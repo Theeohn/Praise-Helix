@@ -3,6 +3,14 @@
 Format: [keep a changelog](https://keepachangelog.com/en/1.1.0/).
 Version headings match `manifest.json`'s `version`.
 
+## [0.12] - 2026-11-26
+
+### Changed
+
+- HELIX: a random press every 0.3 s (was 0.2 s), and one of your own inputs
+  reaches the game every 0.9 s (was 1.3 s).
+- Every press, random or your HELIX command, is held for 12 frames (was 8).
+
 ## [0.11] - 2026-11-26
 
 ### Changed

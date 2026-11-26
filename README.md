@@ -4,8 +4,6 @@
 Helix presses a random button for you on a timer: UP, DOWN, LEFT, RIGHT, A,
 B, START or SELECT. It works on **Gen 1, Gen 2 and Gen 3**.
 
-USE THIS MOD WITH CAUTION AND BACKUP YOUR SAVEFILE JUST IN CASE. I am not responsible if something in this mod doesn't work entirely as planned and you overwrite a save after releasing your shiny Mewtwo. You have been warned.
-
 It goes nearly everywhere you can, the way the stream did: the bag, the
 party, the PC, shops, the POKéMON CENTER, the Day-Care, NPCs' questions,
 berry trees. It stays out of the few places that could actually hurt your
@@ -15,10 +13,10 @@ game, and holding **START+SELECT** turns it off.
 ## Install
 
 **Easiest:** in the game's launcher, use **Import mod .zip** (or just drag
-`Praise-Helix-v0.11.zip` onto the game window). Works the same on Windows, Mac and
+`Praise-Helix-v0.12.zip` onto the game window). Works the same on Windows, Mac and
 Linux.
 
-**Manually:** unzip `Praise-Helix-v0.11.zip` into a `praise_helix` folder inside the
+**Manually:** unzip `Praise-Helix-v0.12.zip` into a `praise_helix` folder inside the
 game's `mods` folder:
 
 | OS | Mods folder |
@@ -42,7 +40,7 @@ In the Mod Manager (`F10`) → **Praise Helix** → **OPTIONS**:
 | Option | Values | What it does |
 | --- | --- | --- |
 | `STRTSLCT` | (just text) | A reminder of the off switch: hold START+SELECT. |
-| `PRAISE HELIX` | OFF / DIGRAT / BRDJESUS / HELIX | How hard the chaos hits. DIGRAT: a random press every 0.9 seconds. BRDJESUS: every 0.5 seconds. HELIX: every 0.2 seconds, **and** your own buttons go into the queue like a TPP viewer's (see below). OFF: never. |
+| `PRAISE HELIX` | OFF / DIGRAT / BRDJESUS / HELIX | How hard the chaos hits. DIGRAT: a random press every 0.9 seconds. BRDJESUS: every 0.5 seconds. HELIX: every 0.3 seconds, **and** your own buttons go into the queue like a TPP viewer's (see below). OFF: never. |
 | `BATTLES` | OFF / TRAINERS / ALL | Which battles the chaos plays in. TRAINERS (the default) leaves wild battles to you, so a random FIGHT can't knock out a legendary or a shiny you wanted to catch. |
 
 **It starts in the overworld.** After you turn it on (or change the speed),
@@ -55,9 +53,9 @@ often than the other two (about 27% against 36% each). Sometimes it wanders,
 sometimes it mashes.
 
 **HELIX, the true TPP experience.** Your presses don't go straight to the
-game. Every 1.3 seconds, one of your inputs is fed in among the chaos: the
+game. Every 0.9 seconds, one of your inputs is fed in among the chaos: the
 last button you pressed in that window, or the one you're holding. Holding
-RIGHT walks one step every 1.3 seconds; tapping A, LEFT and B in one window
+RIGHT walks one step every 0.9 seconds; tapping A, LEFT and B in one window
 sends just the B.
 
 **Hold START+SELECT to stop, at every speed, HELIX included.** Press START
@@ -110,7 +108,7 @@ in the overworld:
 - The random presses come from Praise Helix's own input source. They can't
   release or override a button you're holding, and a random press is never
   the button that completes the soft-reset chord (A+B+START+SELECT).
-- Each random press is held for a moment (8 frames), so a random direction
+- Each random press is held for a moment (12 frames), so a random direction
   takes one step in the overworld instead of only turning you.
 - Outside HELIX the game sees your START+SELECT as normal presses, so
   stopping it may also open (or close) the START menu.

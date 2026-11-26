@@ -7,9 +7,9 @@ return {
   tags = { "fun", "chaos", "twitch-plays", "input", "challenge" },
   differences = {
     added = {
-      "PRAISE HELIX: OFF / DIGRAT / BRDJESUS / HELIX -- a random UP, DOWN, LEFT, RIGHT, A, B, START or SELECT every 0.9 s / 0.5 s / 0.2 s, on top of the player's own buttons",
+      "PRAISE HELIX: OFF / DIGRAT / BRDJESUS / HELIX -- a random UP, DOWN, LEFT, RIGHT, A, B, START or SELECT every 0.9 s / 0.5 s / 0.3 s (each held 12 frames), on top of the player's own buttons",
       "the direction : other-button mix swings every 10 s between 8:2, 7:3 and 6:4 (8:2 a little less often)",
-      "HELIX also queues the player's own buttons: one of them (the last pressed, or the one held) reaches the game every 1.3 s",
+      "HELIX also queues the player's own buttons: one of them (the last pressed, or the one held) reaches the game every 0.9 s",
       "BATTLES: OFF / TRAINERS / ALL -- which battles the chaos plays in (TRAINERS by default)",
       "hold START+SELECT for a quarter second (keys, pad or two fingers on touch) to turn PRAISE HELIX OFF (saved), ahead of HELIX's queue; a STRTSLCT row tops the options page",
       "starts only once the player is back in the overworld after turning it on",

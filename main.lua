@@ -5,9 +5,9 @@
 --
 --   DIGRAT    one press every 0.9 seconds
 --   BRDJESUS  one press every 0.5 seconds
---   HELIX     one press every 0.2 seconds, AND your own buttons go into the
+--   HELIX     one press every 0.3 seconds, AND your own buttons go into the
 --             queue like a TPP viewer's: the game only gets one of your
---             inputs every 1.3 seconds (the last button you pressed, or the
+--             inputs every 0.9 seconds (the last button you pressed, or the
 --             one you are holding), fed in among the chaos
 --
 -- The mix of directions to everything else swings every 10 seconds between
@@ -91,13 +91,13 @@ local Context = V.require("context")
 
 -- ------- timing (the game runs a fixed 60 logic steps a second)
 
-local STEPS = { digrat = 54, brdjesus = 30, helix = 12 }
--- HELIX: one of the player's own inputs gets through every 1.3 s
-local PLAYER_EVERY = 78
+local STEPS = { digrat = 54, brdjesus = 30, helix = 18 }
+-- HELIX: one of the player's own inputs gets through every 0.9 s
+local PLAYER_EVERY = 54
 -- each press is held this many steps: long enough that a direction takes
 -- one step in the overworld (a one-step tap only turns the player on the
 -- Game Boy games), short of the fastest interval
-local HOLD = 8
+local HOLD = 12
 -- START+SELECT must be held together this long to stop it (a quarter
 -- second: a deliberate press, not a brush of the thumb)
 local STOP_HOLD = 15
@@ -264,7 +264,7 @@ end
 -- While HELIX runs, the input's readers -- isDown and wasPressed, which
 -- every screen of all three generations reads buttons through -- answer
 -- from this mod's own presses only.  The player's buttons are collected
--- raw and one is fed back in every 1.3 seconds.  The view is only in place
+-- raw and one is fed back in every 0.9 seconds.  The view is only in place
 -- while HELIX is running (off, paused, any other speed: the engine's own
 -- functions, untouched), and it takes itself out if this mod stops
 -- stepping for any reason: Input:step notices two steps with no tick from
@@ -500,7 +500,7 @@ end)
 
 readSpeed()
 
-mod.exports.version = "0.11"
+mod.exports.version = "0.12"
 mod.exports._internal = { V = V, context = Context, state = state, step = step,
   setSpeed = setSpeed, STEPS = STEPS, HOLD = HOLD, PLAYER_EVERY = PLAYER_EVERY,
   STOP_HOLD = STOP_HOLD, MIX_EVERY = MIX_EVERY, MIXES = MIXES, MIX_WEIGHTS = MIX_WEIGHTS,
