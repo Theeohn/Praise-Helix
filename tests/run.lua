@@ -9,7 +9,7 @@
 --   * that A is never pressed on RELEASE, or during a release, in any PC
 --   * the driver through the engine's REAL Input: speeds, the swinging
 --     direction mix, the start-in-the-overworld delay, START+SELECT to stop (keys,
---     pad and touch; never the mod's own presses), HELIX's 1.3 s queue and
+--     pad and touch; never the mod's own presses), HELIX's 0.9 s queue and
 --     its self-removing view, the soft-reset guard, and how little it does
 --     per frame.
 
@@ -486,6 +486,8 @@ for gen = 1, 3 do
     local function hold(btn, source) Input:sourcePress(btn, source or ("key:" .. btn)) end
     local function let(btn, source) Input:sourceRelease(btn, source or ("key:" .. btn)) end
 
+    eq(I.STEPS.digrat .. "/" .. I.STEPS.brdjesus .. "/" .. I.STEPS.helix .. "/" .. I.PLAYER_EVERY .. "/" .. I.HOLD,
+      "54/30/18/54/12", tag .. "steps: 0.9 s / 0.5 s / 0.3 s, HELIX input 0.9 s, each press held 12 frames")
     local game = newGame()
     current = { up = true, a = true }
     eq(#run("digrat", 540, game), 10, tag .. "DIGRAT: one press every 0.9 s (10 in 9 s)")
@@ -495,10 +497,20 @@ for gen = 1, 3 do
     game = newGame(); current = { up = true, a = true }
     eq(#run("brdjesus", 600, game), 20, tag .. "BRDJESUS: one press every 0.5 s (20 in 10 s)")
     game = newGame(); current = { up = true, a = true }
-    eq(#run("helix", 600, game), 50, tag .. "HELIX: one press every 0.2 s (50 in 10 s)")
+    eq(#run("helix", 540, game), 30, tag .. "HELIX: one press every 0.3 s (30 in 9 s)")
     game = newGame()
     eq(#run("helix", 600, game), 0, tag .. "a screen it stays out of gets no random press")
 
+    -- each press is held exactly 12 frames
+    game = newGame(); current = { up = true }
+    setOpt("speed", "helix")
+    local heldFrames, presses = 0, 0
+    for t = 1, 18 * 10 + 11 do        -- ten presses, the last one held out in full
+      tick(game)
+      if Input:isDown("up") then heldFrames = heldFrames + 1 end
+      if Input:wasPressed("up") then presses = presses + 1 end
+    end
+    eq(heldFrames / math.max(1, presses), 12, tag .. "each press is held 12 frames")
     -- it starts only once you are back in the overworld
     game = newGame(); current = { up = true }
     ow = false
@@ -552,9 +564,14 @@ for gen = 1, 3 do
     setOpt("speed", "brdjesus")
     edgesSeen = {}
     local mixes, changesOffBeat, last = {}, 0, nil
+    local expected, nEdges = 0, 0
     for t = 1, 600 * 120 do
       tick(game)
       local m = I.state.mix
+      if #edgesSeen > nEdges then
+        expected = expected + m * (#edgesSeen - nEdges)
+        nEdges = #edgesSeen
+      end
       if last and m ~= last and I.state.mixTimer ~= 0 then changesOffBeat = changesOffBeat + 1 end
       if I.state.mixTimer == 0 then mixes[m] = true end
       last = m
@@ -568,7 +585,9 @@ for gen = 1, 3 do
     end
     eq(keys(seen), ALL, tag .. "every allowed button comes up, SELECT included")
     local share = moves / math.max(1, #edgesSeen)
-    check(share > 0.66 and share < 0.72, tag .. ("overall the directions are about 69 in 100 (%.3f)"):format(share))
+    local want = expected / math.max(1, #edgesSeen)
+    check(math.abs(share - want) < 0.04,  -- ~4 sigma over 2400 presses
+      tag .. ("over the run the directions follow the mixes in force (%.3f, expected %.3f)"):format(share, want))
     game = newGame(); current = { a = true, b = true }
     local onlyFace = true
     for _, b in ipairs(run("brdjesus", 600, game)) do if b ~= "a" and b ~= "b" then onlyFace = false end end
@@ -638,7 +657,7 @@ for gen = 1, 3 do
     eq(#run("brdjesus", 600, game), 20, tag .. "the mod presses SELECT itself")
     eq(speedNow(), "brdjesus", tag .. "and that does not stop it")
     game = newGame(); current = { start = true, select = true }
-    eq(#run("helix", 1200, game), 100, tag .. "the mod pressing START and SELECT never stops it")
+    eq(#run("helix", 1080, game), 60, tag .. "the mod pressing START and SELECT never stops it")
     eq(speedNow(), "helix", tag .. "(still on)")
 
     -- the soft-reset chord: a random press never completes A+B+START+SELECT
@@ -656,7 +675,7 @@ for gen = 1, 3 do
     let("a", "key:z"); let("b", "key:x"); let("start", "key:return")
     setOpt("speed", "off"); tick(game)
 
-    -- ---- HELIX's queue: the game only gets one of your inputs every 1.3 s
+    -- ---- HELIX's queue: the game only gets one of your inputs every 0.9 s
     game = newGame()
     setOpt("speed", "helix")
     edgesSeen = {}
@@ -672,24 +691,24 @@ for gen = 1, 3 do
       tick(game)
       if Input:wasPressed("a") then gotA = true end
     end
-    check(gotA, tag .. "HELIX: your A is fed in when the 1.3 s queue comes round")
+    check(gotA, tag .. "HELIX: your A is fed in when the 0.9 s queue comes round")
     game = newGame()
     setOpt("speed", "helix")
     hold("right", "key:right")
     local rights = 0
-    for _ = 1, 78 * 5 do
+    for _ = 1, I.PLAYER_EVERY * 5 do
       tick(game)
       if Input:wasPressed("right") then rights = rights + 1 end
     end
     let("right", "key:right")
-    eq(rights, 5, tag .. "HELIX: holding RIGHT gives one RIGHT every 1.3 s (5 in 6.5 s)")
+    eq(rights, 5, tag .. "HELIX: holding RIGHT gives one RIGHT every 0.9 s (5 in 4.5 s)")
     game = newGame()
     setOpt("speed", "helix")
     for _, b in ipairs({ "up", "left", "select" }) do
       hold(b); tick(game); let(b); tick(game)
     end
     local fed = {}
-    for _ = 1, 78 do
+    for _ = 1, I.PLAYER_EVERY do
       tick(game)
       for _, b in ipairs({ "up", "left", "select" }) do if Input:wasPressed(b) then fed[#fed + 1] = b end end
     end
