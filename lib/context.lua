@@ -9,9 +9,10 @@
 --
 -- M.allowed(game) answers, at the moment of a press, with one of:
 --
---   M.ALL    every button
---   M.NO_A   every button but A
---   nil      no random press at all
+--   M.ALL          every button
+--   M.NO_A         every button but A
+--   M.NO_A_START   every button but A and START
+--   nil            no random press at all
 --
 -- Never pressed into (nil), and the chaos stays paused until you are back
 -- in the overworld once you go there (see M.locks):
@@ -30,6 +31,11 @@
 -- POKEMON can only ever be released by you.  On the START menu A is only
 -- pressed on the game's own safe rows.
 --
+-- Never A or START on SAVE (M.NO_A_START): not on the START menu's SAVE
+-- row, and inside the save screen not while YES is highlighted (the first
+-- "save?" and the "overwrite?" after it).  It can move to NO and pick that,
+-- or back out with B, but the game is only ever saved by you.
+--
 -- Everything here is read only when a press is about to happen, or when
 -- the screen on top changes; nothing runs on the frames in between.
 
@@ -45,6 +51,12 @@ end
 
 M.ALL = set("up", "down", "left", "right", "a", "b", "start", "select")
 M.NO_A = set("up", "down", "left", "right", "b", "start", "select")
+M.NO_A_START = set("up", "down", "left", "right", "b", "select")
+
+local function verdict(noA, noStart)
+  if noStart then return M.NO_A_START end
+  return noA and M.NO_A or M.ALL
+end
 
 local find, lower = string.find, string.lower
 
@@ -137,16 +149,18 @@ end
 -- ---------------------------------------------------------- START menus
 
 local GEN1_SAFE = { "POKéDEX", "POKéMON", "ITEM", "SAVE" }
+local function gen1Text(k)
+  local Strings = loaded["src.core.Strings"]
+  if not Strings then return k end
+  local ok, text = pcall(Strings, k)
+  return ok and text or k
+end
 local function gen1StartSafe(game, s)
   local row = highlighted(s)
   local label = row and row.label
   if label == nil then return false end
-  local Strings = loaded["src.core.Strings"]
   for i = 1, #GEN1_SAFE do
-    local k = GEN1_SAFE[i]
-    local ok, text = true, k
-    if Strings then ok, text = pcall(Strings, k) end
-    if ok and label == text then return true end
+    if label == gen1Text(GEN1_SAFE[i]) then return true end
   end
   local player = game.save and game.save.player
   return label == ((player and player.name) or "RED")
@@ -154,17 +168,23 @@ end
 
 local GEN2_SAFE = { pokedex = true, pokemon = true, pack = true, pokegear = true,
   status = true, save = true }
-local function gen2StartSafe(s)
+local function gen2Row(s)
   local rows, list = s.items, s.list
-  local row = type(rows) == "table" and rows[(list and list.index) or 1]
+  return type(rows) == "table" and rows[(list and list.index) or 1] or nil
+end
+local function gen2StartSafe(s)
+  local row = gen2Row(s)
   return row ~= nil and GEN2_SAFE[row.value] == true
 end
 
 local GEN3_SAFE = { pokedex = true, pokemon = true, bag = true, pyramid_bag = true,
   pokenav = true, trainer = true, save = true, exit = true, retire = true }
-local function gen3StartSafe()
+local function gen3Entry()
   local SM = loaded["src.ui.game3.start_menu"]
-  local e = SM and type(SM.ENTRIES) == "table" and SM.ENTRIES[SM.cursor or 1]
+  return SM and type(SM.ENTRIES) == "table" and SM.ENTRIES[SM.cursor or 1] or nil
+end
+local function gen3StartSafe()
+  local e = gen3Entry()
   return e ~= nil and GEN3_SAFE[e.id] == true
 end
 
@@ -185,6 +205,16 @@ local function startSafe(gen, game, s)
   return gen2StartSafe(s)
 end
 
+-- is the START menu's SAVE row the highlighted one?
+local function startOnSave(gen, s)
+  if gen == 1 then
+    local row = highlighted(s)
+    return row ~= nil and row.label == gen1Text("SAVE")
+  end
+  local row = gen2Row(s)
+  return row ~= nil and row.value == "save"
+end
+
 local function deniedScreen(s)
   return type(s) == "table" and (s.isModOptions == true or deniedId(s.screenId))
 end
@@ -199,7 +229,7 @@ local function stackAllowed(gen, game)
   end
   local n = list and #list or 0
   local inGame = (gen == 2)
-  local noA = false
+  local noA, noStart = false, false
   for i = 1, n do
     local s = list[i]
     if type(s) == "table" then
@@ -219,13 +249,31 @@ local function stackAllowed(gen, game)
         if gen == 2 and s.phase ~= nil and i == n then return nil end  -- QUIT's confirm
         if i < n and not startSafe(gen, game, s) then return nil end
         if i == n and not startSafe(gen, game, s) then noA = true end
+        if startOnSave(gen, s) then
+          if i == n then
+            noA, noStart = true, true
+          elseif gen == 1 then
+            -- Red/Blue/Yellow's save runs above the START menu, which keeps
+            -- SAVE highlighted the whole way: the panel, "Would you like to
+            -- SAVE?", "the older file will be erased" -- no A or START
+            -- unless a YES/NO is up with its cursor on NO
+            local top = list[n]
+            local CB = loaded["src.ui.ChoiceBox"]
+            if not (CB and getmetatable(top) == CB and top.index == 2) then
+              noA, noStart = true, true
+            end
+          end
+        end
+      elseif id == "Gen2SaveMenu" or id == "SaveMenu" then
+        -- Gold/Silver/Crystal's save screen: YES is choice 1
+        if s.choice ~= 2 then noA, noStart = true, true end
       end
       if not noA and screenReleases(s) then noA = true end
     end
   end
   if not inGame then return nil end
   if gen == 2 and n == 0 and game.world.battleActive then return nil end
-  return noA and M.NO_A or M.ALL
+  return verdict(noA, noStart)
 end
 
 -- ---------------------------------------------------------- Gen 3
@@ -241,7 +289,7 @@ local function gen3Allowed(game)
   end
   local Stack = loaded["src.ui.game3.stack"]
   local layers = Stack and Stack._layers
-  local noA = false
+  local noA, noStart = false, false
   if type(layers) == "table" then
     local n = #layers
     for i = 1, n do
@@ -260,6 +308,12 @@ local function gen3Allowed(game)
           if i < n then return nil end
           noA = true
         end
+        local e = gen3Entry()
+        if i == n and e and e.id == "save" then noA, noStart = true, true end
+      elseif id == "save" then
+        -- the save screen: YES is cursor 1 (the "overwrite?" too)
+        local Save = type(layer.mod) == "table" and layer.mod or loaded["src.ui.game3.save_menu"]
+        if not (Save and Save.cursor == 2) then noA, noStart = true, true end
       end
     end
   end
@@ -272,7 +326,7 @@ local function gen3Allowed(game)
       noA = true
     end
   end
-  return noA and M.NO_A or M.ALL
+  return verdict(noA, noStart)
 end
 
 -- ---------------------------------------------------------- the API
