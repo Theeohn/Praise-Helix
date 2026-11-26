@@ -3,6 +3,43 @@
 Format: [keep a changelog](https://keepachangelog.com/en/1.1.0/).
 Version headings match `manifest.json`'s `version`.
 
+## [0.13.2] - 2026-11-26
+
+### Changed
+
+- A, B, START and SELECT are held for 2 frames now, not tapped for one:
+  long enough to register reliably, still short of the fastest interval.
+- The mod never has two of its own presses active at once: the chaos and
+  your own command echoed back in HELIX now wait for each other. Your own
+  START+SELECT is read apart from all of this and still always works.
+- The SELECT+A/B display-chord guard (0.13) is load-bearing again now that
+  SELECT is genuinely held for a couple of frames, not just a tap.
+
+## [0.13.1] - 2026-11-26
+
+### Changed
+
+- Only a direction (UP/DOWN/LEFT/RIGHT) is held (12 frames). A, B, START
+  and SELECT are each a single tap now -- pressed and immediately let go,
+  never held across frames.
+- As a consequence, our own SELECT can no longer be caught "down" by
+  anything outside the one instant of its own tap, which is what let the
+  0.13 gamepad chord ever happen in the first place; that guard stays in
+  as a second layer regardless.
+
+## [0.13] - 2026-11-26
+
+### Fixed
+
+- On a gamepad, holding SELECT (the chaos, or your own command echoed back
+  in HELIX) could complete the recomp's own SELECT+A / SELECT+B shortcut
+  (COLORS / TILT) the instant you pressed A or B for an ordinary reason --
+  that shortcut is read straight off whether SELECT is down, which can't
+  tell our hold from yours. Our held SELECT now steps aside for exactly
+  that one real press and comes straight back after. Your own SELECT,
+  genuinely held, still works the shortcut as it always did. The keyboard
+  path (a literal "3" key) was never reachable by the mod to begin with.
+
 ## [0.12] - 2026-11-26
 
 ### Changed

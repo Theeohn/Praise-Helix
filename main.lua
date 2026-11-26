@@ -13,6 +13,11 @@
 -- The mix of directions to everything else swings every 10 seconds between
 -- 8:2, 7:3 and 6:4 (8:2 a little less often than the other two).
 --
+-- A direction is held for 12 frames, so it takes a real step in the
+-- overworld; A, B, START and SELECT for 2, long enough to register.
+-- Never two of its own presses at once: the next one waits for the last to
+-- finish (your own START+SELECT, below, is read apart from all of this).
+--
 -- It starts once you are back in the overworld: turning it on in a menu
 -- never sends chaos into that menu.  It goes nearly everywhere you can --
 -- lib/context.lua has the short list of where it never presses (settings,
@@ -94,10 +99,14 @@ local Context = V.require("context")
 local STEPS = { digrat = 54, brdjesus = 30, helix = 18 }
 -- HELIX: one of the player's own inputs gets through every 0.9 s
 local PLAYER_EVERY = 54
--- each press is held this many steps: long enough that a direction takes
--- one step in the overworld (a one-step tap only turns the player on the
--- Game Boy games), short of the fastest interval
+-- a direction is held this many steps: long enough that it takes one step
+-- in the overworld (a one-tick tap only turns the player on the Game Boy
+-- games), short of the fastest interval
 local HOLD = 12
+-- A, B, START and SELECT are held this many steps instead: long enough to
+-- register with the game (a single tick risked being too short), short
+-- enough that it still reads as one press, not a hold of its own
+local HOLD_FACE = 2
 -- START+SELECT must be held together this long to stop it (a quarter
 -- second: a deliberate press, not a brush of the thumb)
 local STOP_HOLD = 15
@@ -118,6 +127,13 @@ local function log(level, msg)
     pcall(l[level], l, "%s", msg)
   end
 end
+
+-- On a gamepad, holding SELECT and pressing A or B is the recomp's own
+-- shortcut for COLORS / TILT (src/core/Game.lua's padPressedBody): it reads
+-- Input:isDown("select") the instant a REAL A/B press arrives, and that
+-- can't tell your hold from a press this mod made.  okGamepadMap guards the
+-- one place that matters.
+local okGamepadMap, GamepadMap = pcall(require, "src.core.GamepadMap")
 
 -- ------- turning it off (START+SELECT)
 
@@ -202,6 +218,11 @@ local function pressInto(slot, game, btn)
   end
   return false
 end
+
+-- The d-pad is held for HOLD steps (so a direction takes a real step in
+-- the overworld); A, B, START and SELECT for the shorter HOLD_FACE instead.
+local HOLD_BUTTONS = { up = true, down = true, left = true, right = true }
+local function holdFor(btn) return HOLD_BUTTONS[btn] and HOLD or HOLD_FACE end
 
 -- The soft-reset chord is A+B+START+SELECT.  A random press must never be
 -- the button that completes it (you holding three of them while the mod
@@ -443,10 +464,14 @@ local function step(game)
     recordPlayer(input)
     if state.playerHeld then
       state.playerHeldFor = state.playerHeldFor + 1
-      if state.playerHeldFor >= HOLD then let("playerHeld") end
+      if state.playerHeldFor >= holdFor(state.playerHeld.btn) then let("playerHeld") end
     end
     state.playerTimer = state.playerTimer + 1
-    if state.playerTimer >= PLAYER_EVERY and not state.playerHeld and state.stopFor == 0 then
+    -- never a second press while one is still going: our own presses never
+    -- overlap each other, the chaos's included, only your own START+SELECT
+    -- is read apart from all of this (see the top of step())
+    if state.playerTimer >= PLAYER_EVERY and not state.playerHeld and not state.held
+        and state.stopFor == 0 then
       state.playerTimer = 0
       local cmd = state.lastSeen
       if not cmd then
@@ -468,10 +493,12 @@ local function step(game)
   local held = state.held
   if held then
     state.heldFor = state.heldFor + 1
-    if state.heldFor >= HOLD or completesChord(input, held.btn) then let("held") end
+    if state.heldFor >= holdFor(held.btn) or completesChord(input, held.btn) then let("held") end
   end
   state.timer = state.timer + 1
-  if state.timer < every or state.held then return end
+  -- never a second press while one is still going (yours in HELIX's queue
+  -- included)
+  if state.timer < every or state.held or state.playerHeld then return end
   state.timer = 0
   -- while you are holding the off switch, nothing new is pressed (START+
   -- SELECT is half of the soft-reset chord; the rest stays yours)
@@ -491,6 +518,60 @@ mod.hooks:wrap("input.step", function(next, game, dt)
   return next(game, dt)
 end)
 
+-- Never let our own held SELECT -- the chaos, or your own command echoed
+-- back in HELIX -- complete the recomp's SELECT+A (COLORS) or SELECT+B
+-- (TILT) shortcut on a button you pressed for an ordinary reason.  Our
+-- SELECT steps aside for just that one real press and comes straight back
+-- after, so your own SELECT, genuinely held, still works as it always did.
+-- SELECT is genuinely held for HOLD_FACE steps (0.13.1), so this is load-
+-- bearing, not a backstop: that short window is exactly when a real press
+-- could otherwise land on top of ours.
+local function liftOurSelect()
+  local lifted
+  for _, slot in ipairs({ "held", "playerHeld" }) do
+    local h = state[slot]
+    if h and h.btn == "select" then
+      pcall(mod.input.release, mod.input, h.token)
+      lifted = lifted or {}
+      lifted[#lifted + 1] = slot
+    end
+  end
+  return lifted
+end
+
+local function restoreOurSelect(game, lifted)
+  if not lifted then return end
+  for _, slot in ipairs(lifted) do
+    local ok, token = pcall(mod.input.press, mod.input, game, "select")
+    if ok and token then
+      state[slot] = { btn = "select", token = token }
+    else
+      state[slot] = nil
+      state[slot .. "For"] = 0
+    end
+  end
+end
+
+-- Only a real A/B/X/Y/leftshoulder press can complete that chord (see
+-- GamepadMap.displayChordDigit); if GamepadMap can't be read, guard every
+-- press rather than none.
+local function chordCapable(button)
+  if not okGamepadMap then return true end
+  local ok, digit = pcall(GamepadMap.displayChordDigit, button)
+  return ok and digit ~= nil
+end
+
+mod.hooks:wrap("input.gamepad", function(next, game, ctx)
+  if type(ctx) == "table" and ctx.phase == "pressed" and chordCapable(ctx.button) then
+    local lifted = liftOurSelect()
+    local ok, a, b, c = pcall(next, game, ctx)
+    restoreOurSelect(game, lifted)
+    if not ok then error(a, 0) end
+    return a, b, c
+  end
+  return next(game, ctx)
+end)
+
 mod.events:on("mod.options_changed", function(ev)
   if type(ev) == "table" and ev.mod == mod.id and ev.key == "speed" then
     if ev.value ~= "off" then state.forcedOff = false end
@@ -500,9 +581,10 @@ end)
 
 readSpeed()
 
-mod.exports.version = "0.12"
+mod.exports.version = "0.13.2"
 mod.exports._internal = { V = V, context = Context, state = state, step = step,
   setSpeed = setSpeed, STEPS = STEPS, HOLD = HOLD, PLAYER_EVERY = PLAYER_EVERY,
   STOP_HOLD = STOP_HOLD, MIX_EVERY = MIX_EVERY, MIXES = MIXES, MIX_WEIGHTS = MIX_WEIGHTS,
-  pick = pick, newMix = newMix, hintRow = hintRow,
+  pick = pick, newMix = newMix, hintRow = hintRow, HOLD_BUTTONS = HOLD_BUTTONS,
+  HOLD_FACE = HOLD_FACE, holdFor = holdFor, pressInto = pressInto, let = let,
   viewInstalled = function() return saved ~= nil end }

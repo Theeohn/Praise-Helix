@@ -13,10 +13,10 @@ game, and holding **START+SELECT** turns it off.
 ## Install
 
 **Easiest:** in the game's launcher, use **Import mod .zip** (or just drag
-`Praise-Helix-v0.12.zip` onto the game window). Works the same on Windows, Mac and
+`Praise-Helix-v0.13.2.zip` onto the game window). Works the same on Windows, Mac and
 Linux.
 
-**Manually:** unzip `Praise-Helix-v0.12.zip` into a `praise_helix` folder inside the
+**Manually:** unzip `Praise-Helix-v0.13.2.zip` into a `praise_helix` folder inside the
 game's `mods` folder:
 
 | OS | Mods folder |
@@ -108,8 +108,21 @@ in the overworld:
 - The random presses come from Praise Helix's own input source. They can't
   release or override a button you're holding, and a random press is never
   the button that completes the soft-reset chord (A+B+START+SELECT).
-- Each random press is held for a moment (12 frames), so a random direction
-  takes one step in the overworld instead of only turning you.
+- **TILT / COLORS can't be hijacked.** On a gamepad, the recomp's own
+  SELECT+A (COLORS) and SELECT+B (TILT) display shortcuts fire the instant
+  you press a real A or B while SELECT reads as held -- it can't tell your
+  hold from ours. So our own held SELECT (the chaos, or your own command
+  echoed back in HELIX) steps aside for that one real press and comes
+  straight back after. Your own SELECT, really held, still works the
+  shortcut as it always did. On keyboard, TILT and COLORS are a literal "3"
+  / "2" keypress the mod has no way to send.
+- A direction is held for 12 frames, so it takes a real step in the
+  overworld. A, B, START and SELECT are held too, just for 2 frames instead
+  -- long enough to register, short of the fastest interval.
+- The mod never has two of its own presses going at once: the chaos and
+  your own command echoed back in HELIX always wait for each other, so only
+  one button is ever down from the mod at a time. Your own START+SELECT is
+  read apart from all of this and always works.
 - Outside HELIX the game sees your START+SELECT as normal presses, so
   stopping it may also open (or close) the START menu.
 - Opening OPTIONS or the Mod Manager pauses the chaos, and lifts HELIX's
