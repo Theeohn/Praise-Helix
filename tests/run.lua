@@ -511,6 +511,34 @@ for gen = 1, 3 do
       if Input:wasPressed("up") then presses = presses + 1 end
     end
     eq(heldFrames / math.max(1, presses), 12, tag .. "each press is held 12 frames")
+    -- A, B, START and SELECT are held too, just for 2 frames instead of 12
+    -- -- long enough to register, short of the fastest interval (18 steps).
+    -- Checked against the real engine Input (not HELIX's view).
+    for _, btn in ipairs({ "a", "b", "start", "select" }) do
+      game = newGame(); current = { [btn] = true }
+      setOpt("speed", "brdjesus")
+      local downFrames, presses2 = 0, 0
+      for _ = 1, 30 * 10 + 2 do
+        tick(game)
+        if Input:wasPressed(btn) then presses2 = presses2 + 1 end
+        if Input:isDown(btn) then downFrames = downFrames + 1 end
+      end
+      eq(downFrames / math.max(1, presses2), 2, tag .. btn .. " is held for 2 frames, not 12 like a direction")
+    end
+    -- never two of its own presses overlapping: in HELIX, the chaos and
+    -- your own echoed command never both show as held at once
+    game = newGame(); current = { up = true, a = true, b = true, start = true, select = true }
+    setOpt("speed", "helix")
+    hold("left", "key:left")
+    local overlap, anyHeld = false, false
+    for _ = 1, 18 * 200 do
+      tick(game)
+      if I.state.held and I.state.playerHeld then overlap = true end
+      if I.state.held or I.state.playerHeld then anyHeld = true end
+    end
+    let("left", "key:left")
+    check(not overlap, tag .. "the chaos and your echoed HELIX command never overlap")
+    check(anyHeld, tag .. "(something was pressed)")
     -- it starts only once you are back in the overworld
     game = newGame(); current = { up = true }
     ow = false
@@ -535,13 +563,14 @@ for gen = 1, 3 do
     before = #edgesSeen
     for _ = 1, 300 do tick(game) end
     eq(#edgesSeen, before, tag .. "changing the speed waits for the overworld too")
-    -- a held press is let go the moment its screen stops allowing it
-    game = newGame(); current = { a = true }
+    -- a held press (a direction -- the only kind still held) is let go the
+    -- moment its screen stops allowing it
+    game = newGame(); current = { up = true }
     run("brdjesus", 30, game)
-    local holding = Input:isDown("a")
+    local holding = Input:isDown("up")
     current, topv = nil, { "new screen" }
     tick(game)
-    check(holding and not Input:isDown("a"), tag .. "a press is let go at once when the screen changes")
+    check(holding and not Input:isDown("up"), tag .. "a held press is let go at once when the screen changes")
 
     -- the mix: 8:2, 7:3 and 6:4, swinging every 10 s, 8:2 a bit less often
     local counts, N = { [0.8] = 0, [0.7] = 0, [0.6] = 0 }, 60000
@@ -674,6 +703,54 @@ for gen = 1, 3 do
     check(not chord, tag .. "a random SELECT never completes the soft-reset chord you're holding")
     let("a", "key:z"); let("b", "key:x"); let("start", "key:return")
     setOpt("speed", "off"); tick(game)
+
+    -- ---- the SELECT+A/B display-chord guard (COLORS / TILT)
+    --
+    -- src/core/Game.lua's padPressedBody reads Input:isDown("select") the
+    -- instant a REAL gamepad A/B/X/Y/leftshoulder press arrives, to decide
+    -- whether it's half of the recomp's own SELECT+face shortcut (COLORS,
+    -- TILT, ...).  SELECT is genuinely held for HOLD_FACE (2) steps, so
+    -- this guard is load-bearing, not a backstop; exercised here against
+    -- ordinary chaos, forced to pick SELECT every time.
+    do
+      local Runtime = require("src.mods.Runtime")
+      local function fireGamepad(button, phase)
+        local seenSelect
+        local vanilla = function(g, c) seenSelect = g.input:isDown("select") end
+        Runtime.hooks:call("input.gamepad", vanilla, game, { phase = phase, button = button })
+        return seenSelect
+      end
+      game = newGame(); current = { select = true }
+      setOpt("speed", "brdjesus")
+      for _ = 1, 40 do
+        tick(game)
+        if I.state.held and I.state.held.btn == "select" then break end
+      end
+      check(I.state.held and I.state.held.btn == "select" and Input:isDown("select"),
+        tag .. "(ordinary chaos is genuinely holding SELECT)")
+      eq(fireGamepad("b", "pressed"), false, tag .. "that held SELECT steps aside for a real B press")
+      check(I.state.held and I.state.held.btn == "select" and Input:isDown("select"), tag .. "and comes straight back after")
+      eq(fireGamepad("a", "pressed"), false, tag .. "and for a real A press too")
+      eq(fireGamepad("left", "pressed"), true, tag .. "but not for a button that can't complete the chord")
+      eq(fireGamepad("b", "released"), true, tag .. "nor for a release")
+      setOpt("speed", "off"); tick(game)
+      -- your own SELECT, really held, still completes the shortcut for you
+      game = newGame(); current = {}
+      hold("select", "pad:1:back")
+      eq(fireGamepad("b", "pressed"), true, tag .. "your own real SELECT still works for a real B press")
+      let("select", "pad:1:back")
+      -- both at once: ours steps aside, yours still shows through
+      game = newGame(); current = { select = true }
+      setOpt("speed", "brdjesus")
+      for _ = 1, 40 do
+        tick(game)
+        if I.state.held and I.state.held.btn == "select" then break end
+      end
+      hold("select", "pad:1:back")
+      eq(fireGamepad("b", "pressed"), true, tag .. "holding your own SELECT too: still seen, ours or not")
+      let("select", "pad:1:back")
+      setOpt("speed", "off"); tick(game)
+    end
 
     -- ---- HELIX's queue: the game only gets one of your inputs every 0.9 s
     game = newGame()
