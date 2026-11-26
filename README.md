@@ -4,6 +4,8 @@
 Helix presses a random button for you on a timer: UP, DOWN, LEFT, RIGHT, A,
 B, START or SELECT. It works on **Gen 1, Gen 2 and Gen 3**.
 
+USE THIS MOD WITH CAUTION AND BACKUP YOUR SAVEFILE JUST IN CASE I am not responsible if something in this mod doesn't work entirely as planned and you overwrite a save after releasing your shiny Mewtwo. You have been warned.
+
 It goes nearly everywhere you can, the way the stream did: the bag, the
 party, the PC, shops, the POKéMON CENTER, the Day-Care, NPCs' questions,
 berry trees. It stays out of the few places that could actually hurt your
