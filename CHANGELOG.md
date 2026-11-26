@@ -3,6 +3,15 @@
 Format: [keep a changelog](https://keepachangelog.com/en/1.1.0/).
 Version headings match `manifest.json`'s `version`.
 
+## [0.11] - 2026-11-26
+
+### Changed
+
+- Never A or START on the START menu's SAVE row, and never A or START while
+  YES is highlighted in the save screen ("save?" and "overwrite?"), on all
+  three generations. It can still pick NO or back out with B, so your game
+  is only ever saved by you.
+
 ## [0.1] - 2026-11-26
 
 First public release.

@@ -6,17 +6,17 @@ B, START or SELECT. It works on **Gen 1, Gen 2 and Gen 3**.
 
 It goes nearly everywhere you can, the way the stream did: the bag, the
 party, the PC, shops, the POKéMON CENTER, the Day-Care, NPCs' questions,
-berry trees, SAVE. It stays out of the few places that could actually hurt
-your game or your setup, it never presses A on **RELEASE**, and holding
-**START+SELECT** turns it off.
+berry trees. It stays out of the few places that could actually hurt your
+game or your setup, it never presses A on **RELEASE**, it never saves your
+game, and holding **START+SELECT** turns it off.
 
 ## Install
 
 **Easiest:** in the game's launcher, use **Import mod .zip** (or just drag
-`Praise-Helix-v0.1.zip` onto the game window). Works the same on Windows, Mac and
+`Praise-Helix-v0.11.zip` onto the game window). Works the same on Windows, Mac and
 Linux.
 
-**Manually:** unzip `Praise-Helix-v0.1.zip` into a `praise_helix` folder inside the
+**Manually:** unzip `Praise-Helix-v0.11.zip` into a `praise_helix` folder inside the
 game's `mods` folder:
 
 | OS | Mods folder |
@@ -74,8 +74,8 @@ rebuilt (a new Pokédex, bag or party menu). That covers:
 
 - the overworld, signs, NPCs and their YES/NO questions, berry trees and
   items on the ground, your registered key item (SELECT)
-- the START menu: POKéDEX, POKéMON, BAG / ITEM / PACK, POKéGEAR, POKéNAV,
-  your trainer card and SAVE, and everything inside them
+- the START menu: POKéDEX, POKéMON, BAG / ITEM / PACK, POKéGEAR, POKéNAV
+  and your trainer card, and everything inside them
 - the PC, shops, the POKéMON CENTER, the Day-Care, naming screens,
   evolutions, learning and forgetting moves, the Game Corner
 - battles, all of the menu (picked with BATTLES)
@@ -83,6 +83,12 @@ rebuilt (a new Pokédex, bag or party menu). That covers:
 **Never A on RELEASE.** In any PC, a random A is never pressed while RELEASE
 is highlighted, or anywhere in a release (picking the POKéMON, "are you
 sure?", the goodbye). A POKéMON can only ever be released by you.
+
+**Never A or START on SAVE.** The chaos can move the cursor over the START
+menu's SAVE row, but never presses A or START on it. If you open the save
+screen yourself, it never presses A or START while YES is highlighted (on
+"save?" or on "overwrite the old file?"). It can still move to NO and pick
+it, or back out with B. Your game is only ever saved by you.
 
 **Never at all.** The chaos pauses here, and stays paused until you're back
 in the overworld:

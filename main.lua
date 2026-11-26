@@ -16,8 +16,9 @@
 -- It starts once you are back in the overworld: turning it on in a menu
 -- never sends chaos into that menu.  It goes nearly everywhere you can --
 -- lib/context.lua has the short list of where it never presses (settings,
--- the Mod Manager, a mod's own START row, link play, the title) and the one
--- button it never presses on RELEASE in the PC (A).
+-- the Mod Manager, a mod's own START row, link play, the title), the one
+-- button it never presses on RELEASE in the PC (A), and the two it never
+-- presses on SAVE or the save screen's YES (A and START).
 --
 -- HOLD START+SELECT together for a quarter of a second to stop it, at any
 -- speed, HELIX included: read from your raw buttons (keyboard, pad, or two
@@ -499,7 +500,7 @@ end)
 
 readSpeed()
 
-mod.exports.version = "0.1"
+mod.exports.version = "0.11"
 mod.exports._internal = { V = V, context = Context, state = state, step = step,
   setSpeed = setSpeed, STEPS = STEPS, HOLD = HOLD, PLAYER_EVERY = PLAYER_EVERY,
   STOP_HOLD = STOP_HOLD, MIX_EVERY = MIX_EVERY, MIXES = MIXES, MIX_WEIGHTS = MIX_WEIGHTS,

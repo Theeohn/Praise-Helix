@@ -15,8 +15,9 @@ return {
       "starts only once the player is back in the overworld after turning it on",
     },
     known = {
-      "goes nearly everywhere: overworld, START menu screens and all their submenus, PC, shops, POKEMON CENTER, Day-Care, NPC yes/no, berry trees, SAVE, battles -- mod-rebuilt screens included",
+      "goes nearly everywhere: overworld, START menu screens and all their submenus, PC, shops, POKEMON CENTER, Day-Care, NPC yes/no, berry trees, battles -- mod-rebuilt screens included",
       "never A on RELEASE in any PC, or during a release",
+      "never A or START on the START menu's SAVE row, or on YES in the save screen (save? / overwrite?): the game is only saved by the player",
       "never in the Mod Manager, any options/settings screen, START rows that are not the game's own (OPTION, MODS, QUIT, mod rows) or what they open, link play, the title; paused until the overworld",
       "the player's START+SELECT is also seen by the game outside HELIX (it may open the START menu)",
     },
