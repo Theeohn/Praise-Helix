@@ -41,6 +41,7 @@ end
 
 local ALL = "up,down,left,right,a,b,start,select"
 local NO_A = "up,down,left,right,b,start,select"
+local NO_A_START = "up,down,left,right,b,select"
 
 local function boot(gen)
   local opts = { generation = gen }
@@ -117,15 +118,28 @@ for gen = 1, 3 do
       -- the START menu, by row
       local rows = { Strings("POKéDEX"), Strings("POKéMON"), Strings("ITEM"), "ASH",
         Strings("SAVE"), Strings("OPTION"), "MODS", "GAMESHARK", Strings("QUIT") }
-      local want = { ALL, ALL, ALL, ALL, ALL, NO_A, NO_A, NO_A, NO_A }
+      local want = { ALL, ALL, ALL, ALL, NO_A_START, NO_A, NO_A, NO_A, NO_A }
+      local above = { ALL, ALL, ALL, ALL, NO_A_START, "-", "-", "-", "-" }
       local menu = setmetatable({ screenId = "StartMenu", items = {}, index = 1 }, Menu)
       for i, l in ipairs(rows) do menu.items[i] = { label = l } end
       for i, l in ipairs(rows) do
         menu.index = i
         eq(verdict(g(over, menu)), want[i], tag .. "START menu on " .. l)
-        eq(verdict(g(over, menu, { screenId = "SomeScreen" })), want[i] == ALL and ALL or "-",
+        eq(verdict(g(over, menu, { screenId = "SomeScreen" })), above[i],
           tag .. "a screen opened from START's " .. l)
       end
+      -- the save: no A or START on YES, anywhere in it
+      menu.index = 5
+      local panel = {}
+      eq(verdict(g(over, menu, panel)), NO_A_START, tag .. "save panel: no A or START")
+      eq(verdict(g(over, menu, panel, setmetatable({}, TextBox))), NO_A_START,
+        tag .. "\"Would you like to SAVE?\": no A or START")
+      local yn = setmetatable({ index = 1 }, ChoiceBox)
+      eq(verdict(g(over, menu, panel, setmetatable({}, TextBox), yn)), NO_A_START, tag .. "save YES/NO on YES: no A or START")
+      yn.index = 2
+      eq(verdict(g(over, menu, panel, setmetatable({}, TextBox), yn)), ALL, tag .. "save YES/NO on NO: every button")
+      yn.index = 1
+      eq(verdict(g(over, setmetatable({}, ChoiceBox))), ALL, tag .. "an NPC's YES/NO on YES: still every button")
       -- RELEASE in the PC
       local pc = setmetatable({ items = { { label = Strings("WITHDRAW <PK><MN>") },
         { label = Strings("DEPOSIT <PK><MN>") }, { label = Strings("RELEASE <PK><MN>") },
@@ -182,7 +196,7 @@ for gen = 1, 3 do
       for _, id in ipairs({ "Gen2PokedexMenu", "Gen2PartyMenu", "Gen2PackMenu", "Gen2TrainerCard",
           "Gen2PcMenu", "Gen2BoxMenu", "Gen2CenterPcMenu", "Gen2MartMenu", "Gen2NamingScreen",
           "Gen2EvolutionAnim", "Gen2DayCareMenu", "Gen2MoveDeleter", "Gen2ScriptMenu", "Gen2Pokegear",
-          "Gen2SaveMenu", "Gen2TradeMenu", "Gen2BankOfMom" }) do
+          "Gen2TradeMenu", "Gen2BankOfMom" }) do
         eq(verdict(g(nil, { screenId = id })), ALL, tag .. id .. ": every button")
       end
       eq(verdict(g(nil, setmetatable({}, TextBox))), ALL, tag .. "a text box: every button")
@@ -191,7 +205,7 @@ for gen = 1, 3 do
         eq(verdict(g(nil, { screenId = id })), "-", tag .. id .. ": nothing")
       end
       local rows = { "pokedex", "pokemon", "pack", "pokegear", "status", "save", "option", "mods", "quit" }
-      local want = { ALL, ALL, ALL, ALL, ALL, ALL, NO_A, NO_A, NO_A }
+      local want = { ALL, ALL, ALL, ALL, ALL, NO_A_START, NO_A, NO_A, NO_A }
       local sm = { screenId = "Gen2StartMenu", items = {}, list = { index = 1 } }
       for i, v in ipairs(rows) do sm.items[i] = { value = v, label = v:upper() } end
       sm.items[#sm.items + 1] = { label = "GAMESHARK", onSelect = function() end }
@@ -208,6 +222,25 @@ for gen = 1, 3 do
       sm.phase = "confirm"
       eq(verdict(g(nil, sm)), "-", tag .. "QUIT's confirm: nothing")
       sm.phase = nil
+      -- the save screen: no A or START while YES is highlighted
+      local sv = { screenId = "Gen2SaveMenu", phase = "confirm", choice = 1 }
+      eq(verdict(g(nil, sv)), NO_A_START, tag .. "save screen on YES: no A or START")
+      sv.choice = 2
+      eq(verdict(g(nil, sv)), ALL, tag .. "save screen on NO: every button")
+      sv.phase, sv.choice = "overwrite", 1
+      eq(verdict(g(nil, sv)), NO_A_START, tag .. "\"overwrite?\" on YES: no A or START")
+      local Save2 = require("src.ui.gen2.SaveMenu")
+      local okS, real = pcall(Save2.new, { data = r.data, save = { player = {}, options = {} } },
+        { save = { player = {}, options = {} }, writer = function() return true end })
+      if okS and type(real) == "table" then
+        real.screenId = real.screenId or "Gen2SaveMenu"
+        eq(real.choice, 1, tag .. "(the real save screen opens on YES)")
+        eq(verdict(g(nil, real)), NO_A_START, tag .. "real save screen on YES: no A or START")
+        real.choice = 2
+        eq(verdict(g(nil, real)), ALL, tag .. "real save screen on NO: every button")
+      else
+        print("note: gen2 SaveMenu did not build headless: " .. tostring(real))
+      end
       -- RELEASE in the PC
       local box = { screenId = "Gen2BoxMenu", phase = "submenu", submenuIndex = 1,
         submenuRows = function() return { { id = "WITHDRAW" }, { id = "STATS" }, { id = "RELEASE" }, { id = "CANCEL" } } end }
@@ -246,7 +279,7 @@ for gen = 1, 3 do
       eq(verdict(game), ALL, tag .. "field: every button")
       eq(verdict({ phase = "boot", session = {} }), "-", tag .. "title screen: nothing")
       for _, id in ipairs({ "pokedex", "party", "bag", "trainer", "summary", "box_storage", "pc_menu",
-          "item_pc", "shop", "naming", "evolution_scene", "move_relearner", "save", "berry_pouch",
+          "item_pc", "shop", "naming", "evolution_scene", "move_relearner", "berry_pouch",
           "rs_daycare_party", "region_map", "modui:7" }) do
         Stack._layers = {}; Stack.push(id, {})
         eq(verdict(game), ALL, tag .. id .. ": every button")
@@ -261,7 +294,7 @@ for gen = 1, 3 do
       Stack._layers = {}
       Stack.push("start", {})
       local rows = { "pokedex", "pokemon", "bag", "pokenav", "trainer", "save", "option", "mods", "exit" }
-      local want = { ALL, ALL, ALL, ALL, ALL, ALL, NO_A, NO_A, ALL }
+      local want = { ALL, ALL, ALL, ALL, ALL, NO_A_START, NO_A, NO_A, ALL }
       SM.ENTRIES = {}
       for i, id in ipairs(rows) do SM.ENTRIES[i] = { id = id, label = id:upper() } end
       SM.ENTRIES[#SM.ENTRIES + 1] = { label = "GAMESHARK", onSelect = function() end }
@@ -278,6 +311,16 @@ for gen = 1, 3 do
       SM.cursor = 2
       check(not Ctx.locks(game, startLayer, { id = "party" }), tag .. "START > POKEMON does not pause it")
       check(Ctx.locks(game, false, { id = "option" }), tag .. "opening OPTION pauses it")
+      Stack._layers = {}
+      -- the save screen: no A or START while YES is highlighted
+      local SaveMenu3 = require("src.ui.game3.save_menu")
+      local oldCursor = SaveMenu3.cursor
+      Stack.push("save", SaveMenu3)
+      SaveMenu3.cursor = 1
+      eq(verdict(game), NO_A_START, tag .. "save screen on YES: no A or START")
+      SaveMenu3.cursor = 2
+      eq(verdict(game), ALL, tag .. "save screen on NO: every button")
+      SaveMenu3.cursor = oldCursor
       Stack._layers = {}
       -- RELEASE in the PC
       Stack.push("box_storage", {})
@@ -330,13 +373,36 @@ for gen = 1, 3 do
       check(ok, tag .. "the real START menu builds (" .. tostring(err) .. ")")
       local menu = g.stack.states[#g.stack.states]
       if ok and menu then
-        local aRows = {}
+        local Strings = require("src.core.Strings")
+        local aRows, saveV = {}, nil
         for i, row in ipairs(menu.items) do
           menu.index = i
-          if keys(Ctx.allowed(g)) == ALL then aRows[#aRows + 1] = tostring(row.label) end
+          local v = keys(Ctx.allowed(g))
+          if v == ALL then aRows[#aRows + 1] = tostring(row.label) end
+          if row.label == Strings("SAVE") then saveV = v end
         end
-        eq(#aRows, 5, tag .. "real START menu: A on POKEDEX, POKEMON, ITEM, the card and SAVE ("
+        eq(#aRows, 4, tag .. "real START menu: A on POKEDEX, POKEMON, ITEM and the card ("
           .. table.concat(aRows, "/") .. ")")
+        eq(saveV, NO_A_START, tag .. "real START menu: SAVE gets no A and no START")
+        -- the real save flow: SAVE's own panel and prompt, then its YES/NO
+        local saveIndex
+        for i, row in ipairs(menu.items) do if row.label == Strings("SAVE") then saveIndex = i end end
+        menu.index = saveIndex
+        local okS, errS = pcall(menu.items[saveIndex].onSelect)
+        check(okS, tag .. "the real SAVE opens (" .. tostring(errS) .. ")")
+        local panel = g.stack.states[#g.stack.states]
+        eq(keys(Ctx.allowed(g)), NO_A_START, tag .. "real save panel: no A or START")
+        if okS and panel and panel.openPrompt then
+          pcall(panel.openPrompt)
+          eq(keys(Ctx.allowed(g)), NO_A_START, tag .. "real \"Would you like to SAVE?\": no A or START")
+          local ChoiceBox = require("src.ui.ChoiceBox")
+          local yn = ChoiceBox.new(g, function() end)
+          g.stack:push(yn)
+          eq(yn.index, 1, tag .. "(the real YES/NO opens on YES)")
+          eq(keys(Ctx.allowed(g)), NO_A_START, tag .. "real save YES/NO on YES: no A or START")
+          yn.index = 2
+          eq(keys(Ctx.allowed(g)), ALL, tag .. "real save YES/NO on NO: every button")
+        end
       end
       g.stack = stackOf(over)
       local ok2, box = pcall(function() return require("src.ui.BoxMenu").new(g) end)
@@ -373,8 +439,8 @@ for gen = 1, 3 do
           m.list.index = i
           if keys(Ctx.allowed(g)) == ALL then aRows[#aRows + 1] = tostring(row.value) end
         end
-        eq(table.concat(aRows, ","), "pokedex,pokemon,pack,pokegear,status,save",
-          tag .. "real START menu: A on the game's own rows, never OPTION/MODS/QUIT")
+        eq(table.concat(aRows, ","), "pokedex,pokemon,pack,pokegear,status",
+          tag .. "real START menu: A on the game's own rows, never SAVE/OPTION/MODS/QUIT")
       end
     end
 
