@@ -1,26 +1,31 @@
 -- Sharing metadata.  Read by tooling and the manager detail pane; never by
 -- the loader's merge.
 return {
-  summary = "Twitch Plays Pokemon chaos on top of your own buttons, on all 11 games, nearly everywhere you can go.",
+  summary = "Twitch Plays Pokemon on top of your own buttons, on all 11 games: a virtual chat that mostly follows what you do, nearly everywhere you can go.",
   author = "Theeohn",
   contact = "",
   tags = { "fun", "chaos", "twitch-plays", "input", "challenge" },
   differences = {
     added = {
-      "PRAISE HELIX: OFF / DIGRAT / BRDJESUS / HELIX -- a random UP, DOWN, LEFT, RIGHT, A, B, START or SELECT every 0.9 s / 0.5 s / 0.3 s, on top of the player's own buttons; a direction is held 12 frames, A/B/START/SELECT 2, and never two of its own presses at once",
-      "the direction : other-button mix swings every 10 s between 8:2, 7:3 and 6:4 (8:2 a little less often)",
-      "HELIX also queues the player's own buttons: one of them (the last pressed, or the one held) reaches the game every 0.9 s",
+      "PRAISE HELIX: OFF / BRDJESUS / HELIX -- a crowd press about every 0.5 s / 0.22 s, on top of the player's own buttons; a direction is held 12 frames, A/B/START/SELECT 2, and never two of its own presses at once",
+      "the crowd: followers copy the player's own inputs a little late (45% / 40%), noise (35% / 40%), herders repeat the last press (13% / 11%), trolls press START or a griefer direction (7% / 9%)",
+      "followers remember the player's last 8 inputs, mashing counted twice at most, each used once, carried across screens; forgotten on settings screens or OFF; the START+SELECT off switch is never remembered",
+      "every 10 s the crowd's size re-rolls (rate x0.5/1/1.5 on BRDJESUS, x0.4/1/1.6 on HELIX) and the noise's direction mix swings between 8:2, 7:3 and 6:4",
+      "EVENTS: ON / OFF (ON by default) -- a 1 in 4 chance every 15 s on BRDJESUS, 1 in 3 every 10 s on HELIX, of a START riot (3-6 STARTs), a 4 s lull at a third of the rate, or a streak of one direction (3-5)",
+      "HELIX also queues the player's own buttons: the oldest waiting (or the one held) reaches the game every 0.6 s; followers draw from the same queue, each input going in once",
       "BATTLES: OFF / TRAINERS / ALL -- which battles the chaos plays in (TRAINERS by default)",
       "hold START+SELECT for a quarter second (keys, pad or two fingers on touch) to turn PRAISE HELIX OFF (saved), ahead of HELIX's queue; a STRTSLCT row tops the options page",
       "starts only once the player is back in the overworld after turning it on",
     },
     known = {
       "goes nearly everywhere: overworld, START menu screens and all their submenus, PC, shops, POKEMON CENTER, Day-Care, NPC yes/no, berry trees, battles -- mod-rebuilt screens included",
+      "every crowd press, followers' included, goes through the safety rules",
       "never A on RELEASE in any PC, or during a release",
       "never A or START on the START menu's SAVE row, or on YES in the save screen (save? / overwrite?): the game is only saved by the player",
       "on a gamepad, our own held SELECT steps aside the instant a real A or B press arrives, so it can never complete the recomp's own SELECT+A/B COLORS/TILT shortcut; your own SELECT, really held, still works",
       "never in the Mod Manager, any options/settings screen, START rows that are not the game's own (OPTION, MODS, QUIT, mod rows) or what they open, link play, the title; paused until the overworld",
       "the player's START+SELECT is also seen by the game outside HELIX (it may open the START menu)",
+      "an old DIGRAT setting reads as OFF",
     },
   },
   credits = {

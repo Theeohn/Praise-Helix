@@ -1,8 +1,10 @@
 # Praise Helix
 
-**Twitch Plays Pokémon, on top of your own buttons.** While you play, Praise
-Helix presses a random button for you on a timer: UP, DOWN, LEFT, RIGHT, A,
-B, START or SELECT. It works on **Gen 1, Gen 2 and Gen 3**.
+**Twitch Plays Pokémon, on top of your own buttons.** While you play, a
+virtual Twitch chat plays along: a crowd that mostly tries to do what *you*
+are doing, a little late, with noise, herders and the odd troll mixed in.
+It presses UP, DOWN, LEFT, RIGHT, A, B, START and SELECT, and it works on
+**Gen 1, Gen 2 and Gen 3**.
 
 It goes nearly everywhere you can, the way the stream did: the bag, the
 party, the PC, shops, the POKéMON CENTER, the Day-Care, NPCs' questions,
@@ -13,10 +15,10 @@ game, and holding **START+SELECT** turns it off.
 ## Install
 
 **Easiest:** in the game's launcher, use **Import mod .zip** (or just drag
-`Praise-Helix-v0.13.2.zip` onto the game window). Works the same on Windows, Mac and
+`Praise-Helix-v1.0.zip` onto the game window). Works the same on Windows, Mac and
 Linux.
 
-**Manually:** unzip `Praise-Helix-v0.13.2.zip` into a `praise_helix` folder inside the
+**Manually:** unzip `Praise-Helix-v1.0.zip` into a `praise_helix` folder inside the
 game's `mods` folder:
 
 | OS | Mods folder |
@@ -40,23 +42,52 @@ In the Mod Manager (`F10`) → **Praise Helix** → **OPTIONS**:
 | Option | Values | What it does |
 | --- | --- | --- |
 | `STRTSLCT` | (just text) | A reminder of the off switch: hold START+SELECT. |
-| `PRAISE HELIX` | OFF / DIGRAT / BRDJESUS / HELIX | How hard the chaos hits. DIGRAT: a random press every 0.9 seconds. BRDJESUS: every 0.5 seconds. HELIX: every 0.3 seconds, **and** your own buttons go into the queue like a TPP viewer's (see below). OFF: never. |
-| `BATTLES` | OFF / TRAINERS / ALL | Which battles the chaos plays in. TRAINERS (the default) leaves wild battles to you, so a random FIGHT can't knock out a legendary or a shiny you wanted to catch. |
+| `PRAISE HELIX` | OFF / BRDJESUS / HELIX | How big and wild the crowd is. BRDJESUS: a press about every 0.5 seconds, and your own buttons go straight through as always. HELIX: a wilder crowd, a press about every 0.22 seconds, **and** your own buttons go into the queue like a TPP viewer's (see below). OFF: no crowd. |
+| `EVENTS` | ON / OFF | Now and then, something happens in chat: a START riot, a lull, or a streak of one direction (see below). ON by default. |
+| `BATTLES` | OFF / TRAINERS / ALL | Which battles the crowd plays in. TRAINERS (the default) leaves wild battles to you, so a random FIGHT can't knock out a legendary or a shiny you wanted to catch. |
 
 **It starts in the overworld.** After you turn it on (or change the speed),
 nothing happens until you've closed the menus and are back walking around.
 If you change your mind on the way out, there's nothing to fix.
 
-**The mix keeps moving.** Every 10 seconds the split between directions and
-the other four buttons swings to 8:2, 7:3 or 6:4. 8:2 comes up a little less
-often than the other two (about 27% against 36% each). Sometimes it wanders,
-sometimes it mashes.
+**Who's in the crowd.** Every press comes from one of four kinds of viewer:
+
+| | BRDJESUS | HELIX |
+| --- | --- | --- |
+| **Followers** copy one of your own inputs, a little late | 45% | 40% |
+| **Noise** presses anything the screen allows | 35% | 40% |
+| **Herders** repeat the crowd's last press | 13% | 11% |
+| **Trolls** press START, or the griefer's favourite direction | 7% | 9% |
+
+When there's nothing of yours left to copy, the followers' turn goes to the
+rest of the crowd. The noise's mix of directions to everything else swings
+every 10 seconds between 8:2, 7:3 and 6:4 (8:2 a little less often).
+
+**What the followers remember.** Your presses, in order, the last 8 of them.
+Mashing one button only counts twice in a row, so frustration doesn't snowball.
+Each remembered input is copied once, and it carries over from screen to
+screen, so a press you made in one place can turn up in the next. They're
+forgotten when you open a settings screen or turn the mod off. Your
+START+SELECT off switch is never remembered.
+
+**The crowd's size moves.** Every 10 seconds it re-rolls: busier, normal or
+quieter (±50% on BRDJESUS, ±60% on HELIX). None of the gaps are exact; they
+average out to the speed.
+
+**Events** (with EVENTS on). On BRDJESUS there's a 1 in 4 chance one starts
+every 15 seconds (about one a minute); on HELIX, 1 in 3 every 10 seconds
+(about one every 30 seconds):
+
+- **Riot:** 3 to 6 STARTs in a row, like the start9 protests.
+- **Lull:** 4 seconds at a third of the rate.
+- **Streak:** one direction, 3 to 5 times over.
 
 **HELIX, the true TPP experience.** Your presses don't go straight to the
-game. Every 0.9 seconds, one of your inputs is fed in among the chaos: the
-last button you pressed in that window, or the one you're holding. Holding
-RIGHT walks one step every 0.9 seconds; tapping A, LEFT and B in one window
-sends just the B.
+game. Every 0.6 seconds, one of your inputs is fed in among the chaos: the
+oldest one still waiting, or the button you're holding. Holding RIGHT walks
+one step every 0.6 seconds; tapping UP, LEFT and B sends all three, one by
+one. The followers draw from the same queue, so your inputs can get through
+sooner than 0.6 seconds, but each one only ever goes in once.
 
 **Hold START+SELECT to stop, at every speed, HELIX included.** Press START
 and SELECT together and hold them for a quarter of a second. That works on a
@@ -64,8 +95,9 @@ keyboard, a pad, or two fingers on the touch screen's START and SELECT.
 They're read straight from your controller, ahead of HELIX's queue. PRAISE
 HELIX goes back to OFF and stays off (it's saved) until you turn it on again
 here. A quick brush of both buttons doesn't count, and neither do the mod's
-own presses: the chaos presses START and SELECT too, and that never stops
-it. While you're holding them, the chaos starts no new presses.
+own presses: the crowd presses START and SELECT too, riots included, and
+that never stops it. While you're holding them, the crowd starts no new
+presses.
 
 ## Where the chaos goes
 
@@ -105,7 +137,10 @@ in the overworld:
 
 ## Things to know
 
-- The random presses come from Praise Helix's own input source. They can't
+- Every crowd press, followers' included, goes through the rules above. A
+  follower copying your A still never presses it on RELEASE or the save
+  screen's YES.
+- The crowd's presses come from Praise Helix's own input source. They can't
   release or override a button you're holding, and a random press is never
   the button that completes the soft-reset chord (A+B+START+SELECT).
 - **TILT / COLORS can't be hijacked.** On a gamepad, the recomp's own
@@ -119,9 +154,9 @@ in the overworld:
 - A direction is held for 12 frames, so it takes a real step in the
   overworld. A, B, START and SELECT are held too, just for 2 frames instead
   -- long enough to register, short of the fastest interval.
-- The mod never has two of its own presses going at once: the chaos and
-  your own command echoed back in HELIX always wait for each other, so only
-  one button is ever down from the mod at a time. Your own START+SELECT is
+- The mod never has two of its own presses going at once: the crowd and
+  your own queued HELIX command always wait for each other, so only one
+  button is ever down from the mod at a time. Your own START+SELECT is
   read apart from all of this and always works.
 - Outside HELIX the game sees your START+SELECT as normal presses, so
   stopping it may also open (or close) the START menu.
@@ -130,11 +165,14 @@ in the overworld:
 - HELIX only ever changes what the game sees, and only while Praise Helix is
   running. If the mod is turned off, unloaded or stops for any reason, the
   engine's own input is put back within two frames.
-- Your own HELIX commands are yours. They aren't limited like the random
+- Your own HELIX commands are yours. They aren't limited like the crowd's
   presses, so they go wherever you steer them.
+- An old DIGRAT setting from an earlier version reads as OFF; pick
+  BRDJESUS or HELIX again.
 - **Built light.** When OFF it costs nothing but a counter. When ON it only
-  looks at the screen when a press is due or the screen changes, about
-  0.2 µs per frame (HELIX about 0.6 µs; roughly double that without the JIT).
+  looks at the screen when a press is due or the screen changes: about
+  0.4 µs per frame on BRDJESUS and 0.5 µs on HELIX (roughly double that
+  without the JIT), against the 16,667 µs a frame has at 60 fps.
 
 ## Credits
 

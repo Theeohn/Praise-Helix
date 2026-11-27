@@ -3,6 +3,48 @@
 Format: [keep a changelog](https://keepachangelog.com/en/1.1.0/).
 Version headings match `manifest.json`'s `version`.
 
+## [1.0] - 2026-11-26
+
+### Changed
+
+- BRDJESUS: a crowd press about every 0.5 s, followers / noise / herders /
+  trolls 45/35/13/7, the crowd's size swinging ±50%, and a 1 in 4 event
+  chance every 15 s. Your own buttons go straight through.
+- HELIX: a wilder crowd, a press about every 0.22 s, followers / noise /
+  herders / trolls 40/40/11/9, the crowd's size swinging ±60%, and a 1 in 3
+  event chance every 10 s. Your own inputs still reach the game every
+  0.6 s.
+- Time lost to a press's hold is now won back by the next gaps (within each
+  10 s), so the fast speeds still average out close to their rate.
+- The event roll runs on its own timer, separate from the 10 s crowd beat.
+
+## [0.9] - 2026-11-26
+
+### Changed
+
+- The random presses are now a virtual Twitch chat. Each press comes from
+  one of four kinds of viewer: followers copy your own inputs a little
+  late, noise presses anything allowed, herders repeat the crowd's last
+  press, trolls press START or the griefer's direction. Shares are
+  56/34/7/3 on BRDJESUS and 45/35/13/7 on HELIX.
+- Followers remember your last 8 inputs, in order. Mashing one button
+  counts twice at most, each input is used once, and the memory carries
+  over between screens. It's forgotten when you open a settings screen or
+  turn the mod off, and the START+SELECT off switch is never remembered.
+- Speeds: OFF / BRDJESUS (a press about every 0.7 s) / HELIX (about every
+  0.4 s). DIGRAT is gone; an old DIGRAT setting reads as OFF.
+- Every 10 s the crowd's size re-rolls: the rate swings x0.6/1/1.4 on
+  BRDJESUS and x0.5/1/1.5 on HELIX, so the gaps average out to the speed.
+- HELIX: one of your inputs reaches the game every 0.6 s (was 0.9 s), the
+  oldest one still waiting rather than only the last one. The followers draw
+  from the same queue, so each input still goes in once.
+
+### Added
+
+- EVENTS: ON / OFF (ON by default). Now and then a START riot (3 to 6
+  STARTs), a 4-second lull at a third of the rate, or a streak of one
+  direction (3 to 5 presses). More often on HELIX.
+
 ## [0.13.2] - 2026-11-26
 
 ### Changed
